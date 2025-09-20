@@ -11,7 +11,6 @@ const balanceManagerAddress = {
 };
 const BALANCE_MANAGER_KEY = "MANAGER_1";
 
-// Main execution function
 (async () => {
   const privateKey = process.env.PRIVATE_KEY;
   if (!privateKey) {
@@ -25,9 +24,6 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
     );
   }
 
-  const BALANCE_MANAGER_KEY =
-    "MANAGER_1"; /* Change this to your desired balance manager key */
-
   console.log(`👉 Running on ${env}`);
 
   // Initialize with balance managers if created
@@ -37,6 +33,8 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
       tradeCap: "",
     },
   };
+
+  console.log(`Selected balance manager object: ${balanceManagerAddress[env]}`);
 
   const mmClient = new DeepBookMarketMaker(privateKey, env, balanceManagers);
   if (!process.env.BALANCE_MANAGER_ADDRESS) {

@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "p0": "npx ts-node faucet.ts",
     "p1": "npx ts-node ./src/1_create_balance_manager.ts",
-    "faucet": "npx ts-node faucet.ts"
+    "p2": "npx ts-node ./src/2_deposit_and_delegate_tradecap.ts"
   },
   "keywords": [],
   "author": "",

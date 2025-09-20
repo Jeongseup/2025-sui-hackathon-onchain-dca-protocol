@@ -37,14 +37,6 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
     mmClient.getActiveAddress()
   )(tx);
 
-  // // Add SUI to balance manager if balance is low
-  // console.log("Depositing 0.01 SUI into Balance Manager");
-  // mmClient.balanceManager.depositIntoManager(
-  //   BALANCE_MANAGER_KEY,
-  //   "SUI",
-  //   0.1
-  // )(tx);
-
   const res = await mmClient.signAndExecute(tx);
   if (res.digest) {
     console.log(
