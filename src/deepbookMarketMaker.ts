@@ -200,4 +200,6 @@ export class DeepBookMarketMaker extends DeepBookClient {
     const formattedBalance = Number(balance.totalBalance) / 1_000_000;
     console.log(`Formatted Balance: ${formattedBalance} USDC`);
   };
+
+  // generateProofAsTrader
 }

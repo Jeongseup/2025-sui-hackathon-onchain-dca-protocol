@@ -51,7 +51,8 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
   const balanceManagers = {
     [BALANCE_MANAGER_KEY]: {
       address: balanceManagerAddress[env],
-      tradeCap: "",
+      tradeCap:
+        "0x9434b149adc74e022d49f760bb333337c93779205efdec7c2e8fc1474b874fe8",
     },
   };
 
@@ -72,7 +73,7 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
 
   // 3. 플랫폼 키로 구매 실행
   const tx = new Transaction();
-  mmClient.placeMarketOrder(tx, poolKeys[env], BALANCE_MANAGER_KEY, 100);
+  mmClient.placeMarketOrder(tx, poolKeys[env], BALANCE_MANAGER_KEY, 100000000);
   const res = await mmClient.signAndExecute(tx);
   if (res.digest) {
     console.log(
