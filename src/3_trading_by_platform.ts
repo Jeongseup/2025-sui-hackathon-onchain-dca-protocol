@@ -1,5 +1,6 @@
 import { Transaction } from "@mysten/sui/transactions";
 import { DeepBookMarketMaker } from "./deepbookMarketMaker";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { config } from "dotenv";
 
 // Load environment variables from .env file
@@ -8,6 +9,11 @@ config();
 const balanceManagerAddress = {
   testnet: process.env.TESTNET_BALANCE_MANAGER_ADDRESS || "",
   mainnet: process.env.MAINNET_BALANCE_MANAGER_ADDRESS || "",
+};
+
+const balanceManagerTradecap = {
+  testnet: process.env.TESTNET_BALANCE_MANAGER_TRADECAP || "",
+  mainnet: process.env.MAINNET_BALANCE_MANAGER_TRADECAP || "",
 };
 
 const assets = {
@@ -20,6 +26,11 @@ const usdc = {
     "0xf7152c05930480cd740d7311b5b8b45c6f488e3a53a11c3f74a6fac36a52e0d7::DBUSDC::DBUSDC",
   mainnet:
     "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+};
+
+const buyingAmount = {
+  testnet: 100000000,
+  mainnet: 200,
 };
 
 const poolKeys = {
@@ -45,14 +56,16 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
     );
   }
 
-  console.log(`👉 Running on ${env}`);
+  const keypair = Ed25519Keypair.fromSecretKey(privateKey);
+  const address = keypair.getPublicKey().toSuiAddress();
+
+  console.log(`👉 Running on ${env} By Platform Account: ${address}`);
 
   // Initialize with balance managers if created
   const balanceManagers = {
     [BALANCE_MANAGER_KEY]: {
       address: balanceManagerAddress[env],
-      tradeCap:
-        "0x9434b149adc74e022d49f760bb333337c93779205efdec7c2e8fc1474b874fe8",
+      tradeCap: balanceManagerTradecap[env],
     },
   };
 
@@ -73,13 +86,16 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
 
   // 3. 플랫폼 키로 구매 실행
   const tx = new Transaction();
-  mmClient.placeMarketOrder(tx, poolKeys[env], BALANCE_MANAGER_KEY, 100000000);
+  mmClient.placeMarketOrder(
+    tx,
+    poolKeys[env],
+    BALANCE_MANAGER_KEY,
+    buyingAmount[env]
+  );
   const res = await mmClient.signAndExecute(tx);
   if (res.digest) {
     console.log(
       `Transaction Digest: ${res.digest}, Status: ${res.effects?.status.status}`
     );
   }
-
-  // console.dir(res, { depth: null });
 })();

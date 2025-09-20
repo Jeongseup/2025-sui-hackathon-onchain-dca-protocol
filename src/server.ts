@@ -1,3 +1,4 @@
+import cron from "node-cron";
 import { Transaction } from "@mysten/sui/transactions";
 import { DeepBookMarketMaker } from "./deepbookMarketMaker";
 import { config } from "dotenv";
@@ -12,15 +13,20 @@ const balanceManagerAddress = {
 
 const assets = {
   testnet: ["DEEP", "SUI", "DBUSDC"],
-  mainnet: ["SUI", "USDC", "WUSDT", "WUSDC", "BETH", "DEEP"],
+  mainnet: ["SUI", "USDC", "DEEP"],
+};
+
+const poolKeys = {
+  testnet: "DEEP_SUI",
+  mainnet: "SUI_DBUSDC",
 };
 
 const BALANCE_MANAGER_KEY = "MANAGER_1";
 
-(async () => {
-  const privateKey = process.env.PRIVATE_KEY;
+const trade = async () => {
+  const privateKey = process.env.PLATFORM_PRIVATE_KEY;
   if (!privateKey) {
-    throw new Error("PRIVATE_KEY is not set in the .env file");
+    throw new Error("PLATFORM_PRIVATE_KEY is not set in the .env file");
   }
 
   const env = process.env.ENV as "testnet" | "mainnet" | undefined;
@@ -36,12 +42,12 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
   const balanceManagers = {
     [BALANCE_MANAGER_KEY]: {
       address: balanceManagerAddress[env],
-      tradeCap: "",
+      tradeCap:
+        "0x9434b149adc74e022d49f760bb333337c93779205efdec7c2e8fc1474b874fe8",
     },
   };
 
   console.log(`Selected balance manager object: ${balanceManagerAddress[env]}`);
-
   const mmClient = new DeepBookMarketMaker(privateKey, env, balanceManagers);
 
   // 1. 밸런스 매니저 확인
@@ -53,37 +59,24 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
     console.log(result);
   }
 
-  console.log("⭐️ Balance Manager SUI balance is low, depositing 0.1 SUI");
+  // 2. 풀 파라미터 체크. 최소 구매 수량 확인
+  await mmClient.getPoolBookParams(poolKeys[env]);
 
-  // 2. 밸런스 매니저에 자금 예치 (유저가 total amount(= n day * m amount, ex: 10 day * 100 usdc = 1000usdc)
+  // 3. 플랫폼 키로 구매 실행
   const tx = new Transaction();
-  mmClient.balanceManager.depositIntoManager(
-    BALANCE_MANAGER_KEY,
-    "SUI",
-    0.5
-  )(tx);
-
-  // 2.5 deposit 후 tradecap mint해서 플랫폼 주소로 전달
-  // 플랫폼 주소(큐레이션 주소):
-  const PLATFORM_SUI_ADDRESS =
-    "0x2ff4c579c27f507626641f7f6e795adf2da10c1394d95b57f9f4fa0538f94060";
-
-  mmClient.delegateTradeCap(tx, BALANCE_MANAGER_KEY);
-
-  // send tx
+  mmClient.placeMarketOrder(tx, poolKeys[env], BALANCE_MANAGER_KEY, 100000000);
   const res = await mmClient.signAndExecute(tx);
   if (res.digest) {
     console.log(
       `Transaction Digest: ${res.digest}, Status: ${res.effects?.status.status}`
     );
   }
+};
 
-  // 3. 자금 예치 후에 밸런스 매니저 재확인
-  for (const asset of assets[env]) {
-    const result = await mmClient.checkManagerBalance(
-      BALANCE_MANAGER_KEY,
-      asset
-    );
-    console.log(result);
-  }
-})();
+// Schedule the trading logic to run every hour
+cron.schedule("0 * * * *", () => {
+  console.log("Running a trade...");
+  trade();
+});
+
+console.log("Cron job scheduled.");

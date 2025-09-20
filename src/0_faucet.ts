@@ -15,6 +15,7 @@ config();
   const keypair = Ed25519Keypair.fromSecretKey(privateKey);
   const address = keypair.getPublicKey().toSuiAddress();
 
+  console.log(`MY TEST USER: ${address}`);
   // get tokens from the Devnet faucet server
   const res = await requestSuiFromFaucetV2({
     // connect to Devnet
