@@ -15,6 +15,19 @@ const assets = {
   mainnet: ["SUI", "USDC", "WUSDT", "WUSDC", "BETH", "DEEP"],
 };
 
+const usdc = {
+  testnet: {
+    coinName: "DBUSDC",
+    coinType:
+      "0xf7152c05930480cd740d7311b5b8b45c6f488e3a53a11c3f74a6fac36a52e0d7::DBUSDC::DBUSDC",
+  },
+  mainnet: {
+    coinName: "USDC",
+    coinType:
+      "0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC",
+  },
+};
+
 const BALANCE_MANAGER_KEY = "MANAGER_1";
 
 (async () => {
@@ -44,6 +57,9 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
 
   const mmClient = new DeepBookMarketMaker(privateKey, env, balanceManagers);
 
+  // 유저의 USDC 밸런스 체크
+  await mmClient.getUserUsdcBalance(usdc[env].coinType);
+
   // 1. 밸런스 매니저 확인
   for (const asset of assets[env]) {
     const result = await mmClient.checkManagerBalance(
@@ -59,16 +75,9 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
   const tx = new Transaction();
   mmClient.balanceManager.depositIntoManager(
     BALANCE_MANAGER_KEY,
-    "SUI",
-    0.1
+    usdc[env].coinName,
+    10
   )(tx);
-
-  // 2.5 deposit 후 tradecap mint해서 플랫폼 주소로 전달
-  // 플랫폼 주소(큐레이션 주소):
-  const PLATFORM_SUI_ADDRESS =
-    "0x2ff4c579c27f507626641f7f6e795adf2da10c1394d95b57f9f4fa0538f94060";
-
-  mmClient.delegateTradeCap(tx, BALANCE_MANAGER_KEY);
 
   // send tx
   const res = await mmClient.signAndExecute(tx);

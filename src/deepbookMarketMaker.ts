@@ -118,33 +118,22 @@ export class DeepBookMarketMaker extends DeepBookClient {
 
   // Example usage in DeepBookMarketMaker class
   // Place a market sell of 10 SUI in the DEEP_SUI pool
-  placeMarketOrder = (tx: Transaction, poolKey: string, managerKey: string) => {
+  placeMarketOrder = (
+    tx: Transaction,
+    poolKey: string,
+    managerKey: string,
+    quantity: number
+  ) => {
     tx.add(
       this.deepBook.placeMarketOrder({
         poolKey: poolKey,
         balanceManagerKey: managerKey,
         clientOrderId: "123456789",
-        quantity: 1, // 4USDC for 1 SUI
+        quantity: quantity, // 4USDC for 1 SUI
         isBid: true,
         payWithDeep: false,
       })
     );
-  };
-
-  // swapExactBaseForQuote = async () => {
-  //   this.deepBook.swapExactBaseForQuote();
-  // };
-
-  swapExactBaseForQuote = (tx: Transaction) => {
-    const [baseOut, quoteOut, deepOut] = this.deepBook.swapExactBaseForQuote({
-      poolKey: "DEEP_SUI",
-      amount: 0.01, // amount of SUI to swap
-      deepAmount: 0, // amount of DEEP to pay as fees, excess is returned
-      minOut: 0, // minimum amount of DBUSDC to receive or transaction fails
-    })(tx);
-
-    // Transfer received coins to own address
-    tx.transferObjects([baseOut, quoteOut, deepOut], this.getActiveAddress());
   };
 
   /**
@@ -184,27 +173,31 @@ export class DeepBookMarketMaker extends DeepBookClient {
     return { tickSize, lotSize, minSize };
   };
 
-  delegateTradeCap = async (managerKey: string) => {
-    const tx = new Transaction();
+  delegateTradeCap = async (tx: Transaction, managerKey: string) => {
     // 1. balance_manager::mint_trade_cap 함수 호출
     const [tradeCap] = this.balanceManager.mintTradeCap(managerKey)(tx);
 
-    tx.transferObjects([tradeCap], PLATFORM_ADMIN_ADDRESS);
     // 2. 생성된 TradeCap을 플랫폼 주소로 전송
-    // kor: PTB의 두 번째 작업으로, 바로 위에서 생성된 'tradeCap' 객체를
-    // 플랫폼의 관리자 주소(PLATFORM_ADMIN_ADDRESS)로 전송합니다.
-    // tx.transferObjects(
-    //   [tradeCap], // 전송할 객체 배열
-    //   tx.pure(PLATFORM_ADMIN_ADDRESS) // 받을 주소
-    // );
+    tx.transferObjects([tradeCap], PLATFORM_ADMIN_ADDRESS);
+  };
 
-    const res = await this.suiClient.signAndExecuteTransaction({
-      transaction: tx,
-      signer: this.keypair,
-      options: {
-        showEffects: true,
-        showObjectChanges: true,
-      },
+  // 조회하려는 토큰의 정확한 코인 타입을 지정합니다.
+  // 이것은 메인넷의 Wormhole을 통해 브릿지된 USDC의 주소입니다.
+  // 여기에 확인하려는 토큰의 코인 타입을 입력하세요.
+  // 이 예시는 메인넷에 있는 Wormhole 브릿지 USDC 주소입니다.
+  getUserUsdcBalance = async (coinType: string) => {
+    // const config = new DeepBookConfig();
+    const balance = await this.client.getBalance({
+      owner: this.getActiveAddress(),
+      coinType: coinType,
     });
+
+    // totalBalance는 문자열 형태로 반환되므로, 필요에 따라 숫자로 변환하여 사용해야 합니다.
+    console.log(`Total USDC Balance: ${balance.totalBalance}`);
+    // UI에 표시하기 위해 잔액을 정수 단위로 변환합니다.
+    // USDC는 일반적으로 6개의 소수점을 가집니다.
+    // 실제 사용 시에는 코인의 메타데이터를 통해 소수점 정보를 동적으로 가져오는 것이 좋습니다.
+    const formattedBalance = Number(balance.totalBalance) / 1_000_000;
+    console.log(`Formatted Balance: ${formattedBalance} USDC`);
   };
 }

@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "p0": "npx ts-node faucet.ts",
     "p1": "npx ts-node ./src/1_create_balance_manager.ts",
-    "p2": "npx ts-node ./src/2_deposit_and_delegate_tradecap.ts"
+    "p2": "npx ts-node ./src/2_deposit_and_delegate_tradecap.ts",
+    "p3": "npx ts-node ./src/3_trading_by_platform.ts"
   },
   "keywords": [],
   "author": "",
