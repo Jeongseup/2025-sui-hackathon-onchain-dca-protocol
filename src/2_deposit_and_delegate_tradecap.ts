@@ -76,6 +76,14 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
     console.log(
       `Transaction Digest: ${res.digest}, Status: ${res.effects?.status.status}`
     );
+    const tradeCapChange = res.objectChanges?.find(
+      (change) => change.type === "created" && "objectId" in change
+    );
+    console.log(
+      `👉 TradeCap ID: ${
+        tradeCapChange ? (tradeCapChange as any).objectId : "Not found"
+      }`
+    );
   }
 
   // 3. 자금 예치 후에 밸런스 매니저 재확인

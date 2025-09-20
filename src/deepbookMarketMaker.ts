@@ -175,6 +175,7 @@ export class DeepBookMarketMaker extends DeepBookClient {
 
   delegateTradeCap = async (tx: Transaction, managerKey: string) => {
     // 1. balance_manager::mint_trade_cap 함수 호출
+    // const [tradeCap] = this.balanceManager.mintTradeCap(managerKey)(tx);
     const [tradeCap] = this.balanceManager.mintTradeCap(managerKey)(tx);
 
     // 2. 생성된 TradeCap을 플랫폼 주소로 전송
