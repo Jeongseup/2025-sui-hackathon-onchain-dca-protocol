@@ -30,12 +30,12 @@ const usdc = {
 
 const buyingAmount = {
   testnet: 100000000,
-  mainnet: 200,
+  mainnet: 1,
 };
 
 const poolKeys = {
   testnet: "DEEP_SUI",
-  mainnet: "SUI_DBUSDC",
+  mainnet: "SUI_USDC",
 
   // const poolKey = "DEEP_SUI";
   // const poolKey = "SUI_USDC";

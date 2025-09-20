@@ -57,11 +57,19 @@ const BALANCE_MANAGER_KEY = "MANAGER_1";
 
   // 2. 밸런스 매니저에 자금 예치 (유저가 total amount(= n day * m amount, ex: 10 day * 100 usdc = 1000usdc)
   const tx = new Transaction();
-  mmClient.balanceManager.depositIntoManager(
-    BALANCE_MANAGER_KEY,
-    "SUI",
-    0.5
-  )(tx);
+  if (env === "testnet") {
+    mmClient.balanceManager.depositIntoManager(
+      BALANCE_MANAGER_KEY,
+      "SUI",
+      0.5
+    )(tx);
+  } else {
+    mmClient.balanceManager.depositIntoManager(
+      BALANCE_MANAGER_KEY,
+      "USDC",
+      5
+    )(tx);
+  }
 
   // 2.5 deposit 후 tradecap mint해서 플랫폼 주소로 전달
   // 플랫폼 주소(큐레이션 주소):
